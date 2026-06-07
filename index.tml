@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Media Belajar Luas Persegi Panjang - By Mathnology</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --line: #d9e2ec;
+      --soft-line: #eef2f7;
+      --primary: #2563eb;
+      --primary-dark: #1e40af;
+      --red: #ef4444;
+      --red-soft: rgba(239, 68, 68, 0.08);
+      --blue: #0ea5e9;
+      --blue-soft: rgba(14, 165, 233, 0.18);
+      --green: #16a34a;
+      --green-soft: #ecfdf3;
+      --warning: #92400e;
+      --warning-soft: #fffbeb;
+      --shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      /* Mencegah highlight biru saat di-tap di HP */
+      -webkit-tap-highlight-color: transparent; 
+    }
+
+    /* Aksesibilitas & Mobile Optimization */
+    button, input[type="range"] {
+      touch-action: manipulation; /* Mencegah double-tap zoom di layar sentuh */
+    }
+    
+    button:focus-visible, 
+    input[type="range"]:focus-visible {
+      outline: 3px solid var(--blue);
+      outline-offset: 2px;
+    }
+
+    .app {
+      width: min(1180px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 24px 0;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      /* Font size dinamis untuk Tablet & HP */
+      font-size: clamp(22px, 4vw, 36px); 
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+    }
+
+    .author {
+      display: block;
+      font-size: 14px;
+      color: var(--primary);
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-top: 6px;
+    }
+
+    .brand p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: clamp(14px, 2vw, 16px);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--primary-dark);
+      font-weight: 700;
+      white-space: nowrap;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 340px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .board-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--soft-line);
+      background: linear-gradient(180deg, #ffffff, #fbfdff);
+    }
+
+    .board-title {
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+
+    .board-subtitle {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .canvas-wrap {
+      padding: 16px;
+      background: #f8fafc;
+    }
+
+    .canvas-instruction {
+      margin: 0 0 14px;
+      padding: 10px 14px;
+      background: #fff;
+      border: 1px solid #e0e7ff;
+      border-left: 4px solid var(--primary);
+      border-radius: 8px;
+      font-size: 13.5px;
+      color: #475569;
+      line-height: 1.4;
+    }
+
+    .canvas-instruction strong {
+      color: var(--primary-dark);
+    }
+
+    svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 60vh; /* Agar SVG tidak terlalu tinggi di tablet/HP mode portrait */
+      background: #fff;
+      border: 1px solid var(--soft-line);
+      border-radius: 14px;
+    }
+
+    /* Styling Elemen SVG */
+    .axis { stroke: #4b5563; stroke-width: 1.4; marker-end: url(#arrow); }
+    .grid { stroke: #e8eef6; stroke-width: 1; }
+    .tick { stroke: #9ca3af; stroke-width: 1; }
+    .num { font-size: 12px; fill: #374151; }
+    
+    .red-box { fill: var(--red-soft); stroke: var(--red); stroke-width: 3.2; transition: all 0.3s ease; }
+    
+    .blue-cell { 
+      fill: var(--blue-soft); 
+      stroke: var(--blue); 
+      stroke-width: 1.8; 
+      opacity: 0; 
+      transform-origin: center;
+      transform: scale(0.6);
+      transition: opacity 0.25s ease-out, transform 0.25s ease-out; 
+    }
+    .blue-cell.active { opacity: 1; transform: scale(1); }
+    
+    .blue-outline { fill: none; stroke: #0284c7; stroke-width: 3; stroke-dasharray: 8 6; transition: all 0.3s ease; }
+    
+    .cell-number { 
+      font-size: 12px; 
+      fill: #0369a1; 
+      font-weight: 800; 
+      text-anchor: middle; 
+      dominant-baseline: middle;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      pointer-events: none;
+    }
+    .cell-number.active { opacity: 1; }
+
+    /* Pengkodean Warna Teks */
+    .text-len { fill: #2563eb; color: #2563eb; }
+    .text-wid { fill: #ef4444; color: #ef4444; }
+    .text-area { color: #16a34a; }
+    .label-val { font-size: 16px; font-weight: 800; text-anchor: middle; dominant-baseline: middle; }
+    .label-dim { font-size: 13px; font-weight: 700; text-anchor: middle; fill: #475569; }
+
+    /* Panel Kanan */
+    .panel { padding: 16px; }
+    .section + .section { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--soft-line); }
+    .section-title { margin: 0 0 10px; font-size: 15px; font-weight: 800; letter-spacing: -0.01em; }
+    
+    .legend { display: grid; gap: 8px; color: #374151; font-size: 14px; }
+    .legend-item { display: flex; align-items: center; gap: 10px; }
+    .swatch { width: 26px; height: 18px; border-radius: 4px; flex: none; }
+    .swatch.red { border: 3px solid var(--red); background: var(--red-soft); }
+    .swatch.blue { border: 2px solid var(--blue); background: var(--blue-soft); }
+
+    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .stat { border: 1px solid var(--soft-line); border-radius: 14px; padding: 12px; background: #fbfdff; }
+    .stat-label { font-size: 12px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+    .stat-value { margin-top: 5px; font-size: 28px; font-weight: 800; line-height: 1; }
+
+    .control { margin-top: 12px; }
+    .control-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; font-weight: 700; }
+    .value-pill { min-width: 44px; text-align: center; padding: 4px 9px; border-radius: 999px; color: var(--primary-dark); background: #eff6ff; border: 1px solid #bfdbfe; }
+    
+    /* Memperbesar ukuran slider target untuk layar sentuh HP */
+    input[type="range"] { 
+      width: 100%; 
+      height: 24px;
+      accent-color: var(--primary); 
+      cursor: pointer; 
+    }
+
+    .formula-card { border: 1px solid #bfdbfe; background: linear-gradient(180deg, #eff6ff, #ffffff); border-radius: 16px; padding: 16px; text-align: center; }
+    .formula-main { color: var(--text); font-size: clamp(16px, 3vw, 19px); font-weight: 800; letter-spacing: -0.02em; }
+    .formula-detail { margin-top: 8px; font-size: clamp(22px, 4vw, 28px); font-weight: 900; }
+
+    .status { min-height: 76px; padding: 12px; border-radius: 14px; border: 1px solid #fde68a; background: var(--warning-soft); color: var(--warning); line-height: 1.45; font-size: 14px; transition: all 0.3s ease;}
+    .status.done { background: var(--green-soft); border-color: #bbf7d0; color: #166534; font-weight: 700; }
+
+    .buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    button { appearance: none; border: 1px solid var(--line); border-radius: 12px; background: #fff; color: var(--text); font: inherit; font-weight: 800; padding: 12px; cursor: pointer; transition: 0.15s ease; }
+    button:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08); }
+    button:active { transform: translateY(0); box-shadow: none; }
+    button.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+    button.soft { background: #f8fafc; }
+
+    .teacher-note { color: var(--muted); font-size: 13px; line-height: 1.5; }
+
+    /* Media Queries untuk Tablet */
+    @media (max-width: 980px) {
+      .layout { grid-template-columns: 1fr; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .badge { white-space: normal; width: 100%; justify-content: center; }
+    }
+
+    /* Media Queries untuk HP (Mobile) */
+    @media (max-width: 520px) {
+      .app { width: min(100vw - 18px, 1180px); padding: 12px 0; }
+      .buttons { grid-template-columns: 1fr; }
+      .board-head { align-items: stretch; flex-direction: column; }
+      svg { max-height: 45vh; } /* Beri ruang untuk tombol di HP agar tidak tertutup */
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <h1>Media Belajar Luas Persegi Panjang <span class="author">By Mathnology</span></h1>
+        <p>Geser panjang dan lebar untuk melihat bahwa luas adalah jumlah satuan persegi di dalam kotak.</p>
+      </div>
+      <div class="badge">Luas = Panjang × Lebar</div>
+    </header>
+
+    <div class="layout">
+      <section class="card">
+        <div class="board-head">
+          <div>
+            <div class="board-title">Bidang Satuan Persegi</div>
+            <div class="board-subtitle">Kotak merah adalah soal. Kotak biru adalah satuan persegi pengisi.</div>
+          </div>
+          <button class="primary" id="newProblemTop">Soal Baru</button>
+        </div>
+
+        <div class="canvas-wrap">
+          <div class="canvas-instruction">
+            <strong>Atur pengisi satuan persegi pada panel di bawah/samping.</strong> Isi tepat berarti kotak biru menutup rapat area kotak merah.
+          </div>
+          <svg id="canvas" viewBox="0 0 740 640" aria-label="Bidang koordinat persegi panjang">
+            <defs>
+              <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+                <path d="M0,0 L7,3 L0,6 Z" fill="#4b5563"></path>
+              </marker>
+            </defs>
+
+            <g id="gridLayer"></g>
+            <g id="axisLayer"></g>
+            <g id="fillLayer"></g>
+            <g id="problemLayer"></g>
+            <g id="labelLayer"></g>
+          </svg>
+        </div>
+      </section>
+
+      <aside class="card panel">
+        <section class="section" style="margin-top: 0; padding-top: 0; border: none;">
+          <h2 class="section-title">Soal</h2>
+          <div class="stats">
+            <div class="stat">
+              <div class="stat-label">Panjang</div>
+              <div class="stat-value text-len" id="problemLengthText">5</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Lebar</div>
+              <div class="stat-value text-wid" id="problemWidthText">7</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2 class="section-title">Pengisi Satuan Persegi</h2>
+          <div class="control">
+            <div class="control-row"><label for="lengthRange">Panjang pengisi</label><span class="value-pill" id="selectedLengthText">1</span></div>
+            <input id="lengthRange" type="range" min="1" max="10" value="1" aria-label="Atur panjang satuan pengisi" />
+          </div>
+          <div class="control">
+            <div class="control-row"><label for="widthRange">Lebar pengisi</label><span class="value-pill" id="selectedWidthText">1</span></div>
+            <input id="widthRange" type="range" min="1" max="10" value="1" aria-label="Atur lebar satuan pengisi" />
+          </div>
+        </section>
+
+        <section class="section">
+          <h2 class="section-title">Rumus</h2>
+          <div class="formula-card">
+            <div class="formula-main">Luas = <span class="text-len">Panjang</span> × <span class="text-wid">Lebar</span></div>
+            <div class="formula-detail">
+              <span id="formLen" class="text-len">1</span> × 
+              <span id="formWid" class="text-wid">1</span> = 
+              <span id="formArea" class="text-area">1</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="status" id="statusBox" aria-live="polite">Cocokkan ukuran pengisi dengan kotak merah.</div>
+        </section>
+
+        <section class="section">
+          <div class="buttons">
+            <button class="primary" id="autoFillBtn">Isi Otomatis</button>
+            <button class="soft" id="resetBtn">Reset</button>
+            <button class="soft" id="toggleNumberBtn">Tampilkan Nomor</button>
+            <button class="soft" id="newProblemBtn">Soal Baru</button>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="legend">
+            <div class="legend-item"><span class="swatch red"></span><span>Kotak merah = daerah yang dicari luasnya</span></div>
+            <div class="legend-item"><span class="swatch blue"></span><span>Kotak biru = satuan persegi</span></div>
+          </div>
+        </section>
+
+        <section class="section teacher-note">
+          Saran penggunaan: minta siswa menghitung satu baris terlebih dahulu. Setelah itu tekankan bahwa jumlah baris sama dengan lebar, sehingga total satuan persegi adalah panjang dikali lebar.
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    const svg = document.getElementById('canvas');
+    const gridLayer = document.getElementById('gridLayer');
+    const axisLayer = document.getElementById('axisLayer');
+    const fillLayer = document.getElementById('fillLayer');
+    const problemLayer = document.getElementById('problemLayer');
+    const labelLayer = document.getElementById('labelLayer');
+
+    const problemLengthText = document.getElementById('problemLengthText');
+    const problemWidthText = document.getElementById('problemWidthText');
+    const selectedLengthText = document.getElementById('selectedLengthText');
+    const selectedWidthText = document.getElementById('selectedWidthText');
+    
+    // Formula DOM
+    const formLen = document.getElementById('formLen');
+    const formWid = document.getElementById('formWid');
+    const formArea = document.getElementById('formArea');
+    
+    const statusBox = document.getElementById('statusBox');
+    const lengthRange = document.getElementById('lengthRange');
+    const widthRange = document.getElementById('widthRange');
+    const toggleNumberBtn = document.getElementById('toggleNumberBtn');
+
+    const ORIGIN_X = 64;
+    const ORIGIN_Y = 500;
+    const UNIT = 39.5;
+    const MAX_LENGTH = 10;
+    const MAX_WIDTH = 10;
+
+    let problemLength = 5;
+    let problemWidth = 7;
+    let selectedLength = 1;
+    let selectedWidth = 1;
+    let showNumbers = false;
+    let autoTimer = null;
+
+    // Helper Koordinat
+    function sx(x) { return ORIGIN_X + x * UNIT; }
+    function sy(y) { return ORIGIN_Y - y * UNIT; }
+
+    function make(tag, attrs = {}, parent = null) {
+      const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+      for (const [key, value] of Object.entries(attrs)) el.setAttribute(key, value);
+      if (parent) parent.appendChild(el);
+      return el;
+    }
+
+    // --- OPTIMASI DOM: Object Pooling ---
+    let cellPool = [];
+    let textPool = [];
+    let blueOutline, redBox, labelLen, labelWid, textLen, textWid;
+
+    function initStaticLayers() {
+      // Draw Grid
+      for (let i = 0; i <= 16; i++) {
+        make('line', { x1: sx(i), y1: sy(-3), x2: sx(i), y2: sy(12), class: 'grid' }, gridLayer);
+      }
+      for (let i = -3; i <= 12; i++) {
+        make('line', { x1: sx(-1), y1: sy(i), x2: sx(16), y2: sy(i), class: 'grid' }, gridLayer);
+      }
+
+      // Draw Axes
+      make('line', { x1: 14, y1: ORIGIN_Y, x2: 725, y2: ORIGIN_Y, class: 'axis' }, axisLayer);
+      make('line', { x1: ORIGIN_X, y1: 628, x2: ORIGIN_X, y2: 8, class: 'axis' }, axisLayer);
+
+      for (let i = -1; i <= 16; i++) {
+        const x = sx(i);
+        make('line', { x1: x, y1: ORIGIN_Y - 4, x2: x, y2: ORIGIN_Y + 4, class: 'tick' }, axisLayer);
+        make('text', { x: x, y: ORIGIN_Y + 18, class: 'num', 'text-anchor': 'middle' }, axisLayer).textContent = i;
+      }
+      for (let i = -3; i <= 12; i++) {
+        if (i === 0) continue; 
+        const y = sy(i);
+        make('line', { x1: ORIGIN_X - 4, y1: y, x2: ORIGIN_X + 4, y2: y, class: 'tick' }, axisLayer);
+        make('text', { x: ORIGIN_X - 12, y: y, class: 'num', 'text-anchor': 'end', 'dominant-baseline': 'middle' }, axisLayer).textContent = i;
+      }
+    }
+
+    function initPools() {
+      for (let row = 0; row < MAX_WIDTH; row++) {
+        cellPool[row] = [];
+        textPool[row] = [];
+        for (let col = 0; col < MAX_LENGTH; col++) {
+          let rect = make('rect', { 
+            x: sx(col), y: sy(row + 1), width: UNIT, height: UNIT, class: 'blue-cell',
+            style: `transform-origin: ${sx(col) + UNIT/2}px ${sy(row + 1) + UNIT/2}px;`
+          }, fillLayer);
+          
+          let txt = make('text', { 
+            x: sx(col) + UNIT / 2, y: sy(row + 1) + UNIT / 2, class: 'cell-number' 
+          }, fillLayer);
+          
+          cellPool[row][col] = rect;
+          textPool[row][col] = txt;
+        }
+      }
+      
+      blueOutline = make('rect', { class: 'blue-outline' }, fillLayer);
+      redBox = make('rect', { class: 'red-box' }, problemLayer);
+      
+      labelLen = make('text', { class: 'label-val text-len' }, labelLayer);
+      labelWid = make('text', { class: 'label-val text-wid' }, labelLayer);
+      textLen = make('text', { class: 'label-dim' }, labelLayer);
+      textWid = make('text', { class: 'label-dim' }, labelLayer);
+    }
+
+    // --- FUNGSI UPDATE ---
+    function updateFill() {
+      let n = 1;
+      for (let row = 0; row < MAX_WIDTH; row++) {
+        for (let col = 0; col < MAX_LENGTH; col++) {
+          const isActive = col < selectedLength && row < selectedWidth;
+          
+          if (isActive) {
+            cellPool[row][col].classList.add('active');
+            if (showNumbers) {
+              textPool[row][col].textContent = n;
+              textPool[row][col].classList.add('active');
+            } else {
+              textPool[row][col].classList.remove('active');
+            }
+            n++;
+          } else {
+            cellPool[row][col].classList.remove('active');
+            textPool[row][col].classList.remove('active');
+          }
+        }
+      }
+
+      blueOutline.setAttribute('x', sx(0));
+      blueOutline.setAttribute('y', sy(selectedWidth));
+      blueOutline.setAttribute('width', selectedLength * UNIT);
+      blueOutline.setAttribute('height', selectedWidth * UNIT);
+      blueOutline.style.opacity = (selectedLength > 0 && selectedWidth > 0) ? 1 : 0;
+    }
+
+    function updateProblem() {
+      redBox.setAttribute('x', sx(0));
+      redBox.setAttribute('y', sy(problemWidth));
+      redBox.setAttribute('width', problemLength * UNIT);
+      redBox.setAttribute('height', problemWidth * UNIT);
+
+      labelLen.setAttribute('x', sx(problemLength / 2));
+      labelLen.setAttribute('y', sy(-0.7));
+      labelLen.textContent = problemLength;
+
+      textLen.setAttribute('x', sx(problemLength / 2));
+      textLen.setAttribute('y', sy(-1.2));
+      textLen.textContent = 'panjang';
+
+      labelWid.setAttribute('x', sx(-0.6));
+      labelWid.setAttribute('y', sy(problemWidth / 2));
+      labelWid.textContent = problemWidth;
+
+      textWid.setAttribute('x', sx(problemLength) + 30);
+      textWid.setAttribute('y', sy(problemWidth / 2));
+      textWid.textContent = 'lebar';
+    }
+
+    function updatePanel() {
+      const area = selectedLength * selectedWidth;
+      const targetArea = problemLength * problemWidth;
+      const correct = selectedLength === problemLength && selectedWidth === problemWidth;
+
+      problemLengthText.textContent = problemLength;
+      problemWidthText.textContent = problemWidth;
+      selectedLengthText.textContent = selectedLength;
+      selectedWidthText.textContent = selectedWidth;
+      
+      formLen.textContent = selectedLength;
+      formWid.textContent = selectedWidth;
+      formArea.textContent = area;
+      
+      lengthRange.value = selectedLength;
+      widthRange.value = selectedWidth;
+
+      statusBox.className = correct ? 'status done' : 'status';
+      if (correct) {
+        // Cek apakah ini persegi
+        const isSquare = problemLength === problemWidth;
+        const extraNote = isSquare 
+          ? `<br><br><span style="color:#065f46; font-size:13.5px;"><b>💡 Tahukah kamu?</b> Karena panjang dan lebarnya sama-sama <b>${problemLength}</b>, bangun ini disebut <b>Persegi</b>. Persegi adalah bentuk istimewa dari persegi panjang!</span>` 
+          : ``;
+
+        statusBox.innerHTML = `Tepat. Kotak merah tertutup penuh oleh <b>${targetArea}</b> satuan persegi. Jadi luasnya <b><span style="color:#1e40af">${problemLength}</span> × <span style="color:#b91c1c">${problemWidth}</span> = <span style="color:#166534">${targetArea}</span></b>.${extraNote}`;
+      } else if (selectedLength < problemLength || selectedWidth < problemWidth) {
+        statusBox.innerHTML = `Belum penuh. Soal meminta panjang <b>${problemLength}</b> dan lebar <b>${problemWidth}</b>. Tambahkan satuan persegi sampai menutup kotak merah.`;
+      } else {
+        statusBox.innerHTML = `Terlalu besar. Luas soal hanya <b>${targetArea}</b> satuan persegi. Kurangi panjang atau lebar pengisi.`;
+      }
+    }
+
+    function updateAll() {
+      updateFill();
+      updateProblem();
+      updatePanel();
+    }
+
+    // --- LOGIKA APLIKASI ---
+    function stopAuto() {
+      if (autoTimer) {
+        clearTimeout(autoTimer);
+        autoTimer = null;
+      }
+    }
+
+    function newProblem() {
+      stopAuto();
+      
+      // Memberikan peluang 25% untuk menghasilkan Persegi (Panjang = Lebar)
+      if (Math.random() < 0.25) {
+        const size = Math.floor(Math.random() * 7) + 3; // Angka acak 3-9
+        problemLength = size;
+        problemWidth = size;
+      } else {
+        problemLength = Math.floor(Math.random() * 7) + 3; // Angka acak 3-9
+        problemWidth = Math.floor(Math.random() * 7) + 3;  // Angka acak 3-9
+        
+        // Pastikan angka berbeda
+        while (problemWidth === problemLength) {
+          problemWidth = Math.floor(Math.random() * 7) + 3;
+        }
+      }
+
+      selectedLength = 1;
+      selectedWidth = 1;
+      showNumbers = false;
+      toggleNumberBtn.textContent = 'Tampilkan Nomor';
+      updateAll();
+    }
+
+    function autoFill() {
+      stopAuto();
+      selectedLength = 1;
+      selectedWidth = 1;
+      updateAll();
+
+      function step() {
+        if (selectedLength < problemLength) {
+          selectedLength++; 
+        } else if (selectedWidth < problemWidth) {
+          selectedWidth++;  
+        } else {
+          return; 
+        }
+        updateAll();
+        autoTimer = setTimeout(step, selectedLength < problemLength ? 180 : 400);
+      }
+      
+      autoTimer = setTimeout(step, 400);
+    }
+
+    // --- EVENT LISTENERS ---
+    lengthRange.addEventListener('input', (event) => {
+      stopAuto();
+      selectedLength = Number(event.target.value);
+      updateFill();
+      updatePanel();
+    });
+
+    widthRange.addEventListener('input', (event) => {
+      stopAuto();
+      selectedWidth = Number(event.target.value);
+      updateFill();
+      updatePanel();
+    });
+
+    document.getElementById('newProblemTop').addEventListener('click', newProblem);
+    document.getElementById('newProblemBtn').addEventListener('click', newProblem);
+    document.getElementById('autoFillBtn').addEventListener('click', autoFill);
+    
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      stopAuto();
+      selectedLength = 1;
+      selectedWidth = 1;
+      updateFill();
+      updatePanel();
+    });
+    
+    toggleNumberBtn.addEventListener('click', () => {
+      showNumbers = !showNumbers;
+      toggleNumberBtn.textContent = showNumbers ? 'Sembunyikan Nomor' : 'Tampilkan Nomor';
+      updateFill();
+    });
+
+    // --- INIT APP ---
+    initStaticLayers();
+    initPools();
+    newProblem();
+  </script>
+</body>
+</html>
